@@ -105,14 +105,20 @@ then    LINK=YES
 fi
 
 if [ "${LINK}" ]
-then    echo " STRPGMEXP PGMLVL(*CURRENT) SIGNATURE('LIBCURL_${SONAME}')" \
-            > "${BSF}"
+then    cd "${SCRIPTDIR}"
+        echo " STRPGMEXP PGMLVL(*CURRENT) SIGNATURE('LIBCURL_${SONAME}')" \
+            > __tmpbnd.mbr
         for EXPORT in ${EXPORTS}
-        do      echo ' EXPORT    SYMBOL("'"${EXPORT}"'")' >> "${BSF}"
+        do      echo ' EXPORT    SYMBOL("'"${EXPORT}"'")' >> __tmpbnd.mbr
         done
 
-        echo ' ENDPGMEXP' >> "${BSF}"
-fi
+        echo ' ENDPGMEXP' >> __tmpbnd.mbr
+        CMD="CPYFRMSTMF FROMSTMF('__tmpbnd.mbr')"
+        CMD="${CMD} TOMBR('${BSF}') MBROPT(*REPLACE)"
+        system "${CMD}"
+        rm -f __tmpbnd.mbr
+        cd "${TOPDIR}/lib"
+fi 
 
 
 #       Build the service program if needed.
